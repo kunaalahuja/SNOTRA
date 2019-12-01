@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 
 <head>
    <h1 align="center"><u> SNOTRA</u></h1>
@@ -50,7 +50,7 @@ rect.background {
 .form_bookscss {
   position: absolute;
   left: 100px;
-  bottom: 0px;
+  bottom: 35px;
 }
 
 </style>
@@ -65,17 +65,17 @@ rect.background {
 
 <div class= "form_bookscss" id="form_book">
 <form method="post" onSubmit="showCountry()">
-    <input type="number" name="Rating1"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating2"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating3"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating4"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating5"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-  <br><br><br><br><br><br><br><br><br><br>  
-    <input type="number" name="Rating6"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating7"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating8"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating9"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;
-    <input type="number" name="Rating10"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;   
+    <input type="number" name="Rating1"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating2"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating3"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating4"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating5"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+  <br><br><br><br><br><br><br><br><br><br><br>
+    <input type="number" name="Rating6"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating7"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating8"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating9"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;
+    <input type="number" name="Rating10"  placeholder="Enter Rating" > &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;   
     <input type="submit" value="Submit Ratings" >
 </form>
 </div>
@@ -86,7 +86,7 @@ rect.background {
     var w = 1000;
     var h = 300;
     var cellPadding = 10;
-    var margin = 300;
+    var margin = 400;
     var padding = 30;
 
     //Create SVG element      
@@ -116,32 +116,27 @@ rect.background {
 
       svg.append("text")
           .attr("x", 6.5*padding)             
-          .attr("y", (7.2* padding ))
+          .attr("y", (8.2* padding ))
           .attr("text-anchor", "middle")  
           .style("font-size", "14px") 
           .text("New Users: rate the following books from (1-5): "); 
-
-      var random_books = svg.append("g")
-         .attr("class","legend")
-         .attr("x", w - padding)
-         .attr("y", padding)
-         .attr("height", 100)
-         .attr("width", 500);
-
+     
       var random_images = svg.append('g')
          .attr("class","images")         
          .attr("x", 200 )
          .attr("y", 200 )
-         .attr("height", 100)
-         .attr("width", 500);
+         .attr("height", 200)
+         .attr("width", 600);
    
-      //add all images
+         
       random_images.selectAll('image')
          .data(random_books_data)
          .enter()
+         .append("a")
+         .attr("xlink:href", function(d,i) { console.log("book url : ", d.book_url); return d.book_url;})         
          .append('image')
-         .attr("x", function(d,i){ console.log("here inside", d); return (2*(i%5)*100 + 3.2*padding ); })
-         .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 180)+ 3*padding;})
+         .attr("x", function(d,i) { return (2*(i%5)*100 + 3.2*padding ); })
+         .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 200)+ 4*padding;})
          .attr("xlink:href", function(d,i) { return d.image_url;})
          .attr("height", 100)
          .attr("width", 100);
@@ -151,7 +146,7 @@ rect.background {
            .enter()
            .append("text")
            .attr("x", function(d,i){ return (2*(i%5)*100 + 3.2*padding); })
-           .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 180)+ 7*padding})
+           .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 200)+ 8*padding})
            .text(function(d,i) { return d.book_name; })
            .attr("class", "textselected")
            .style("text-anchor", "start")
@@ -162,81 +157,45 @@ rect.background {
            .enter()
            .append("text")
            .attr("x", function(d,i){ return (2*(i%5)*100 + 3.2*padding); })
-           .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 180)+ 7.5*padding})
+           .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 200)+ 8.5*padding})
            //todo .text(function(d,i) { return d.author; })
-           .text(function(d,i) { return "Author" })
+           .text(function(d,i) { return d.author })
            .attr("class", "textselected")
            .style("text-anchor", "start")
            .style("font-size", 12);           
    
-  
+      random_images.selectAll('genre')
+           .data(random_books_data)
+           .enter()
+           .append("text")
+           .attr("x", function(d,i){ return (2*(i%5)*100 + 3.2*padding); })
+           .attr("y", function(d,i) { return h/2  + (parseInt(i/5) * 200)+ 9*padding})
+           .text(function(d,i) { return "Genre: " + d.genre })
+           .attr("class", "textselected")
+           .style("text-anchor", "start")
+           .style("font-size", 12);           
+   
       var legend = svg.append("g")
          .attr("class","legend")
          .attr("x", w - padding)
          .attr("y", padding)
          .attr("height", 100)
          .attr("width", 500);
-   
-      var legend2 = svg.append("g")
-         .attr("class","legend")
-         .attr("x", w - padding)
-         .attr("y", padding)
-         .attr("height", 100)
-         .attr("width", 500);
-
-      var images = svg.append('g')
-         .attr("class","images")         
-         .attr("x", 200 )
-         .attr("y", 200 )
-         .attr("height", 100)
-         .attr("width", 500);
-   
+        
       //add all images
-      images.selectAll('image')
+      legend.selectAll('image')
          .data(books_data)
          .enter()
+         .append("a")
+         .attr("xlink:href", function(d,i) { console.log("book url : ", d.book_url); return d.book_url;})         
          .append('image')
          .attr("x", function(d,i){ return (2*i*100 + 3.2*padding ); })
          .attr("y", function(d,i) { return h/5 + 0*padding;})
          .attr("xlink:href", function(d,i) { return d.image_url;})
          .attr("height", 100)
          .attr("width", 100);
-   
-       //create rectangles 
-       // legend.selectAll('rect')
-       //   .data(books_data)
-       //   .enter()
-       //   .append("rect")
-       //   .attr("x", function(d,i){ return (2*i*100 + 2*padding ); })
-       //   .attr("y", function(d,i) { return h/3 + 5*padding;})
-       //   .attr("width", 2*100- 2*cellPadding)
-       //   .attr("height", 25)
-       //   .style("stroke", function(d) { return 'black'; })
-       //   .style("fill", function(d) { return 'teal'; })
-       
-       legend.selectAll('text')
-           .data(books_data)
-           .enter()
-           .append("text")
-           .attr("x", function(d,i){ return (2*i*100 + 2*padding + 6*cellPadding); })
-           .attr("y", function(d,i) { return h/5 + 4.5*padding;})
-           .text(function(d,i) { return "Author" })
-           .attr("class", "textselected")
-           .style("text-anchor", "start")
-           .style("font-size", 12); 
-
-       // legend2.selectAll('rect')
-       //     .data(books_data)
-       //     .enter()
-       //     .append("rect")
-       //     .attr("x", function(d,i){ return (2*i*100 + 2*padding ); })
-       //     .attr("y", function(d,i) { return h/3 + 6.5*padding;})
-       //     .attr("width", 2*100- 2*cellPadding)
-       //     .attr("height", 25)
-       //     .style("stroke", function(d) { return 'black'; })
-       //     .style("fill", function(d) { return 'orange'; })
-
-        legend2.selectAll('text')
+          
+        legend.selectAll('text')
            .data(books_data)
            .enter()
            .append("text")
@@ -246,7 +205,39 @@ rect.background {
            .attr("class", "textselected")
            .style("text-anchor", "start")
            .style("font-size", 12);           
+        
+        legend.selectAll('author')
+           .data(books_data)
+           .enter()
+           .append("text")
+           .attr("x", function(d,i){ return (2*i*100 + 2*padding + 2*cellPadding); })
+           .attr("y", function(d,i) { return h/5 + 4.5*padding;})
+           .text(function(d,i) { return d.author })
+           .attr("class", "textselected")
+           .style("text-anchor", "start")
+           .style("font-size", 12); 
 
+        legend.selectAll('genre')
+           .data(books_data)
+           .enter()
+           .append("text")
+           .attr("x", function(d,i){ return (2*i*100 + 2*padding + 2*cellPadding); })
+           .attr("y", function(d,i) { return h/5 + 5*padding;})
+           .text(function(d,i) { return "Genre: " + d.genre })
+           .attr("class", "textselected")
+           .style("text-anchor", "start")
+           .style("font-size", 12);   
+
+        legend.selectAll('rating')
+           .data(books_data)
+           .enter()
+           .append("text")
+           .attr("x", function(d,i){ return (2*i*100 + 2*padding + 2*cellPadding); })
+           .attr("y", function(d,i) { return h/5 + 5.5*padding;})
+           .text(function(d,i) { return "Rating: " + d.avg_rating })
+           .attr("class", "textselected")
+           .style("text-anchor", "start")
+           .style("font-size", 12);   
          
     });
       
