@@ -3,6 +3,8 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <!-- <script src="../lib/d3.v5.min.js"></script> -->
 <head>
+    <title>SNOTRA</title>
+    <link rel="shortcut icon" href="https://kunaalahuja.github.io/images/gt_favicon.png">
    <h1 align="center"><u>SNOTRA</u></h1>
 </head>
 
@@ -153,7 +155,7 @@ text {
           .attr("y", (1.5* padding ))
           .attr("text-anchor", "middle")  
           .style("font-size", "14px") 
-          .text("Recommended books for UserID: " + books[0].userID); 
+          .text("Recommended books for Username: " + books[0].user_name); 
 
       svg.append("text")
           .attr("x", 6.5*padding)             
@@ -302,6 +304,8 @@ text {
     node.id = filtered_row[0].id;
     node.name = filtered_row[0].name;
     node.image_url = filtered_row[0].image_url;
+    node.book_url = filtered_row[0].book_url;
+    
     // console.log("in row", filtered_row[0].name);
   }
 
@@ -345,6 +349,9 @@ text {
     //     .attr("r", 20 )      
     //     .style("fill", "red" );
 
+    node.append("a")
+        .attr("xlink:href", function(d,i) { console.log("book url : ", d.book_url); return d.book_url;})         
+         
     var images = node.append("svg:image")
         .attr("xlink:href",  function(d) { return d.image_url;})
         .attr("x", function(d) { return -20;})
