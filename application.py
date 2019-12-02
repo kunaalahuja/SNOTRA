@@ -4,6 +4,7 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 import json
+from datetime import datetime
 from IPython.display import display, Markdown
 import warnings
 
@@ -18,6 +19,8 @@ warnings.filterwarnings('ignore')
 #reviews_filename = "users_and_their_ratings_sam.csv"
 reviews_filename = "user_reviews_1.csv"
 books_filename = "books_with_details_Kunaal.csv"
+user_info_filename = "all_users.csv"
+newdatasetFlag = (reviews_filename == "users_and_their_ratings_sam.csv")
 
 # Reading data from the CSV
 def get_data():
@@ -32,17 +35,34 @@ def get_clean_data():
 #Data cleanup
 def data_cleanup(ratings_data_raw):
   #remove nulls and 0 entry rows
-  ratings_data = ratings_data_raw[(ratings_data_raw['Rating'] != 0) & (ratings_data_raw['Rating'] != '')]
+  if newdatasetFlag == True:
+    ratings_data = ratings_data_raw[(ratings_data_raw['rating'] != 0) & (ratings_data_raw['rating'] != '')]
+    
+    #remove unnecessary columns
+    del ratings_data['Unnamed: 0']
+    del ratings_data['book_name']
+    del ratings_data['average_rating']
   
-  #remove unnecessary columns
-  # del ratings_data['Unnamed: 0']
-  del ratings_data['Book_name']
-  #del ratings_data['average_rating']
-  del ratings_data['Image_url']
+  else:
+    
+    ratings_data = ratings_data_raw[(ratings_data_raw['Rating'] != 0) & (ratings_data_raw['Rating'] != '')]
+    
+    #remove unnecessary columns
+    del ratings_data['Book_name']
+    del ratings_data['Image_url']
 
-  #rename columns
-  ratings_data.rename(columns = {'Rating':'rating', 'User_id':'user_id', 'Book_id':'book_id'}, inplace = True) 
+    #rename columns
+    ratings_data.rename(columns = {'Rating':'rating', 'User_id':'user_id', 'Book_id':'book_id'}, inplace = True) 
+
   return ratings_data
+
+#returns the user data
+def get_user_info():
+  user_data_raw = pd.read_csv(user_info_filename,encoding='iso-8859-1')
+  user_data = user_data_raw
+
+  del user_data["user_reviews_count"]
+  return user_data.set_index('user_id').T.to_dict()
 
 
 ##############################################################
@@ -53,6 +73,11 @@ def data_cleanup(ratings_data_raw):
 
 #Build the tuples of ratings, book_id and user_id
 def buildMatrix(df):
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+  
+    print(current_time,"===========Building Matrix===============\n")
+  
     df = df.pivot(index='user_id', columns='book_id', values='rating')
     df = df.fillna(0)
 
@@ -72,6 +97,10 @@ def buildMatrix(df):
 
 #this is where magic happens, total crazzyyyy
 def cache_matrix(reInitialize = False, fetchDataFromCsv = True):
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print(current_time, "===========Caching Matrix===============\n")
+    
     if reInitialize or 'ratings_matrix' not in globals():
       global ratings_matrix 
       global user_id_index
@@ -123,7 +152,11 @@ def recommend_book_from_sim_user(ratings, similar_user_ids, user_id_index, index
   return books
 
 #this is the exposed end point, returns the recommended books for a given user
-def get_recommended_books(current_user_id, reInitialize = False, topN = 5, topBooks = 1):
+def get_recommended_books(current_user_id, reInitialize = False, topN = 5, topBooks = 1):  
+  
+  now = datetime.now()
+  current_time = now.strftime("%H:%M:%S")
+  print(current_time, "===========Getting recommended books===============\n")
   cache_matrix(reInitialize)
   similar_users = get_similar_users(ratings_matrix, user_id_index, current_user_id, topN)
   return recommend_book_from_sim_user(ratings_matrix, similar_users, user_id_index, index_book_id, topBooks)
@@ -170,6 +203,11 @@ def get_random_books(n=10):
 
 #Crazzzzy max work! I like the design here. I like, I like, I like!
 def get_custom_userID(random_books, rating1, rating2, rating3, rating4, rating5, rating6, rating7, rating8, rating9, rating10):
+  
+  now = datetime.now()
+  current_time = now.strftime("%H:%M:%S")
+  print(current_time, "===========Generating New User===============\n")
+  
   global ratings_data
   new_user_id = int(ratings_data[['user_id']].max().user_id + 1)
 
@@ -200,6 +238,63 @@ def get_book_info_map():
   #book_info_df["image_url"] = book_info_df["book_url"].str.replace("/show/", "/photo/")
   return book_info_df.set_index('book_id').T.to_dict()
 
+##############################################################
+##
+## Force Graph Helper Functions
+##
+##############################################################
+def get_force_graph(UserId, books):
+  now = datetime.now()
+  current_time = now.strftime("%H:%M:%S")
+  print(current_time, "===========Getting Force Graph Data===============\n")
+  user_info = get_user_info()
+  books_info = get_book_info_map()
+
+  cache_matrix(False)
+  similar_users = get_similar_users(ratings_matrix, user_id_index, int(UserId), 5)
+
+  nodes = [];
+  labels = [];
+
+  try:
+    Username = user_info[UserId]["name"]
+  except:
+    Username = "George P. Burdell"
+  
+  #person_url = "https://imagesvc.meredithcorp.io/v3/mm/image?url=https://static.onecms.io/wp-content/uploads/sites/24/2018/12/gettyimages-919870926-2000.jpg"
+  person_url = "https://image.freepik.com/free-vector/man-avatar-profile-round-icon_24640-14044.jpg"
+  person_url2 = "https://image.freepik.com/free-vector/woman-avatar-profile-round-icon_24640-14042.jpg"
+  nodes.append({"id" : UserId, "name" : Username, "group":1, "is_user":1, "image_url": person_url})
+  for xx, book_id in enumerate(books):
+    book_id_2 = "1_" + str(xx) + "_" + str(book_id)
+    nodes.append({"id" : book_id_2, "name" : books_info[book_id]["book_name"][:30], "group":1, "is_user":0, "image_url":books_info[book_id]["image_url"], "distance": 100})
+    labels.append({"source": UserId, "target": book_id_2, "value": 20})
+    
+  for idx, similar_user in enumerate(similar_users[:2]):
+      
+    try:
+      Username = user_info[similar_user]["name"]
+    except:
+      Username = "George P. Burdell"
+
+    similar_user_books = get_recommended_books(similar_user)
+    labels.append({"source": UserId, "target": similar_user, "value": 30*(idx+2)})
+    nodes.append({"id" : similar_user, "name" : Username, "group":idx+2, "is_user":1, "image_url": person_url2, "distance": 1000})
+    for xx, book_id in enumerate(similar_user_books):
+      book_id_2 = str(idx+2) + "_" + str(xx) + "_" + str(book_id)
+      labels.append({"source": similar_user, "target": book_id_2, "value": 20})
+      nodes.append({"id" : book_id_2, "name" : books_info[book_id]["book_name"][:30], "group":idx+2, "is_user":0, "image_url":books_info[book_id]["image_url"], "distance": 100})
+
+  # data2 = pd.DataFrame(nodes).set_index('id').T.to_dict()
+  # force_graph = {"xx":{"nodes":nodes, "links":labels, "data2": data2 }}
+  # data2 = pd.DataFrame(nodes).set_index('id').T.to_dict()
+  help_df = pd.DataFrame(nodes)
+  help_data = help_df.set_index("id").T.to_dict()
+  #force_graph = {"xx": {"nodes":nodes, "links":labels, "help_data":help_data }}
+  force_graph = {"xx": {"nodes":nodes, "links":labels }}
+  
+  return force_graph
+
 
 #############################################################
 ##
@@ -225,7 +320,10 @@ def homepage():
       ratings_data = get_clean_data()
     
     random_books = get_random_books()
-    default_user_id = 16291939
+    if newdatasetFlag == True:
+      default_user_id = 16281068
+    else:
+      default_user_id = 5808559
 
     UserId   = request.form.get('UserId', default_user_id)
   
@@ -242,23 +340,27 @@ def homepage():
     rating10 = request.form.get('Rating10', 0)
 
     if(rating1 != 0 or rating2 != 0 or rating3 != 0 or rating4 != 0 or rating5 != 0 or rating6 != 0 or rating7 != 0 or rating8 != 0 or rating9 != 0 or rating10 != 0):    
-        print("here 2")
+        #print("here 2")
         UserId = get_custom_userID(random_books, rating1, rating2, rating3, rating4, rating5, rating6, rating7, rating8, rating9, rating10)
-        print("new userID", UserId)
+        #print("new userID", UserId)
     #print(UserId)
         
     data.UserId = UserId
-    print("new userID", UserId)
+    print("userID", UserId)
     books = get_recommended_books(int(UserId)) 
     print("Userid: ",UserId, " -- ", books )
 
     books_info_map = get_book_info_map()
 
+    selected_books = books
+    
     books = [ [book] for book in books]
     df = pd.DataFrame(books,  columns = ['BookID'])
     flare = dict()
 
-    d = {"name": "flare", "children": [], "random_books": random_books}
+    force_graph = get_force_graph(int(UserId), selected_books)
+
+    d = {"name": "flare", "children": [], "random_books": random_books, "force_graph": force_graph}
     
     for row in df.values:
         userID = str(UserId)
