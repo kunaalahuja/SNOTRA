@@ -8,6 +8,7 @@ to run the code, clone the repository and go the folder codebase:
 python data_fetch <option>
 
 We support the following operations:
+  
   i)   users - to get the list of users and their relevant information
   
   ii)
