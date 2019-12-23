@@ -5,7 +5,7 @@ to run the code, clone the repository and go the folder codebase:
 
 ## Data Fetch
 
-python data_fetch <option>
+python data_fetch \<operation\>
 
 We support the following operations:
   
