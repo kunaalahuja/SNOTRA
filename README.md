@@ -11,13 +11,13 @@ We support the following operations:
   
   i)   users - to get the list of users and their relevant information
   
-  ii)
+  ii)  reviews - get the reviews details
   
-  iii) 
+  iii) book_id - get all the book ids
   
-  iv) 
+  iv)  books - get the book details
   
-  v) 
+  v)   csv - write all the csvs needed for the recommendation engine
   
 ## Application
 i) python application.py
