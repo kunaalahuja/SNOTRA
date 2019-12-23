@@ -19,6 +19,7 @@ USERS_COUNT = 5
 USERS_FILE        = 'users.csv'
 REVIEWS_FILE      = 'reviews.csv'
 BOOKS_FILE        = 'books.csv'
+BOOKS_ID_FILE     = 'books_id.csv'
 DATA_FILE         = 'master_data.csv'
 BOOKS_DETAIL_FILE = 'books_details.csv'
 BOOKS_DESC_FILE   = 'books_desc.csv'
@@ -118,6 +119,49 @@ def write_user_file():
 
     write_to_csv(user_df, USERS_FILE)
 
+def get_book_ids_df():
+    df = pd.read_csv(BOOKS_ID_FILE)
+    df['genre'] = ''
+    df['book_url'] = ''
+    df['average_rating'] = 0.0
+    df['author'] = ''
+    df.drop_duplicates(inplace=True)
+    df = df.reset_index(drop=True)
+
+    return df
+
+def fetch_book_details():
+    key = get_goodreads_api_key()
+    df  = get_book_ids_data()    
+    exception_list = []
+
+    for i in range(len(df)):
+        try:
+            data_url = 'https://www.goodreads.com/book/show/'+ str(df.loc[i,'book_id']) +'.xml?key=' + key
+            data = get_xml_data(data_url)
+            
+            # Fetching url and average rating 
+            df.loc[i,'book_url'] = 'https://www.goodreads.com/book/show/'+str(df.loc[i,'book_id'])
+            df.loc[i,'average_rating'] = float(data['GoodreadsResponse']['book']['average_rating'])
+            
+            # Fetching author
+            if(type(data['GoodreadsResponse']['book']['authors']['author']) is not list):
+                df.loc[i,'author'] = data['GoodreadsResponse']['book']['authors']['author']['name']
+            else:
+                df.loc[i,'author'] = data['GoodreadsResponse']['book']['authors']['author'][0]['name']
+            
+            # Fetching genre
+            no_of_shelves = len(data['GoodreadsResponse']['book']['popular_shelves']['shelf'])
+            for j in range(no_of_shelves):
+                genre = data['GoodreadsResponse']['book']['popular_shelves']['shelf'][j]['@name']
+                if genre!='to-read' and genre!='currently-reading' and genre!='favorites':
+                    break            
+            df.loc[i,'genre'] = genre
+        
+        except:
+            exception_list.append(i)
+
+    write_to_csv(df, BOOKS_FILE)            
 
 def create_csv_files():
     #REVIEWS
