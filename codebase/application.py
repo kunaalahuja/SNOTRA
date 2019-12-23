@@ -1,24 +1,14 @@
 # Importing libraries
 from flask import Flask, flash, redirect, render_template, request, session, abort,send_from_directory,send_file,jsonify
 import pandas as pd
-import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-from IPython.display import display, Markdown
-import surprise
-from IPython.display import display, Markdown # For pretty-printing tibbles
 from surprise import Reader, Dataset
-from surprise import accuracy
-from surprise import KNNBasic
 from surprise.prediction_algorithms import knns
-import os
-import math
 import nltk
 import string
-import sklearn as sk
 import scipy as sp
-import warnings
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -28,17 +18,27 @@ warnings.filterwarnings('ignore')
 ## Data Preparation
 ##
 ##############################################################
-                    
-reviews_filename = "users_and_their_ratings_sam.csv"
-#reviews_filename = "user_reviews_1.csv"
-books_filename = "books_with_details_Kunaal.csv"
-book_description_filename  = "books_with_desc_Abhishek.csv"
-user_info_filename = "all_users.csv"
-newdatasetFlag = (reviews_filename == "users_and_their_ratings_sam.csv")
+         
+DATA_FOLDER       = 'data/'   
+USERS_FILE        = 'users.csv'
+#USERS_FILE = "user_reviews_1.csv"
+REVIEWS_FILE      = 'reviews.csv'
+BOOKS_FILE        = 'books.csv'
+
+newdatasetFlag = (USERS_FILE == "users.csv")
+
+#READ CSV
+def read_csv(file, encoding = ''):
+    file_path = DATA_FOLDER + file
+    if len(encoding):
+        df = pd.read_csv(file_path, encoding = encoding) 
+    else:
+        df = pd.read_csv(file_path)
+    return df
 
 # Reading data from the CSV
 def get_data():
-  ratings_data_raw = pd.read_csv(reviews_filename)
+  ratings_data_raw = read_csv(USERS_FILE)
   return ratings_data_raw
 
 def get_clean_data():
@@ -339,7 +339,7 @@ def hybrid(user_id,ratings_data,book_ids,similarity_matrix):
     return pred
 
 ratings_data = get_clean_data()
-description_data = data_cleanup_content_based(pd.read_csv(book_description_filename))
+description_data = data_cleanup_content_based(read_csv(REVIEWS_FILE))
 description_data = process_descriptions(description_data)
 
 
@@ -375,28 +375,28 @@ def get_hybrid_recommended_books(current_user_id, reInitialize = False, topN = 5
 
 #creates a map of book_id to image_url
 def get_book_url_map():
-  reviews_raw = pd.read_csv(reviews_filename)
+  reviews_raw = read_csv(USERS_FILE)
   book_url_df = reviews_raw[['Book_id', 'Image_url']]
   book_url_df.rename(columns = {'Image_url':'image_url', 'Book_id':'book_id'}, inplace = True) 
   return book_url_df.set_index('book_id').T.to_dict()
 
 #creates a map of book_id to book_name
 def get_book_name_map():
-  reviews_raw = pd.read_csv(reviews_filename)
+  reviews_raw = read_csv(USERS_FILE)
   book_url_df = reviews_raw[['Book_id', 'Book_name']]
   book_url_df.rename(columns = {'Book_name':'book_name', 'Book_id':'book_id'}, inplace = True) 
   return book_url_df.set_index('book_id').T.to_dict()
 
 #returns the avarage rating of a book
 def get_average_book_rating():
-  reviews_raw = pd.read_csv(reviews_filename)
+  reviews_raw = read_csv(USERS_FILE)
   book_url_df = reviews_raw[['Book_id', 'Rating']]
   book_url_df.rename(columns = {'Rating':'rating', 'Book_id':'book_id'}, inplace = True) 
   return book_url_df.groupby('book_id').mean()
 
 #Get n random books to show a new user 
 def get_random_books(n=10): 
-  books_raw = pd.read_csv(books_filename)
+  books_raw = read_csv(BOOKS_FILE)
   book_df = books_raw[['book_id','author', 'book_url', 'book_name', 'genre', 'image_url', 'average_rating']]
   book_df.rename(columns = {'book_name':'book_name_long'}, inplace = True) 
   book_df['book_id_copy'] = book_df['book_id']
@@ -439,14 +439,14 @@ def get_custom_userID(random_books, rating1, rating2, rating3, rating4, rating5,
 
 #gets all the information we've for each book  
 def get_book_info_map():
-  books_raw = pd.read_csv(books_filename)
+  books_raw = read_csv(BOOKS_FILE)
   book_info_df = books_raw[['book_id', 'author', 'book_url', 'book_name', 'genre', 'image_url', 'average_rating']]
   #book_info_df["image_url"] = book_info_df["book_url"].str.replace("/show/", "/photo/")
   return book_info_df.set_index('book_id').T.to_dict()
 
   #returns the user data
 def get_user_info():
-  user_data_raw = pd.read_csv(user_info_filename,encoding='iso-8859-1')
+  user_data_raw = read_csv(USERS_FILE, encoding='iso-8859-1')
   user_data = user_data_raw
 
   del user_data["user_reviews_count"]
