@@ -6,27 +6,31 @@ import pandas as pd
 import random
 import collections
 import sys
-import getopt
+
+#GLOBAL COUNTERS
 
 TOTAL_USERS = 103525406
-#SAMPLE_USERS = 100000
-#USERS_COUNT = 12000
-SAMPLE_USERS = 100
-USERS_COUNT = 5
+SAMPLE_USERS = 100000
+USERS_COUNT = 12000
+#SAMPLE_USERS = 100
+#USERS_COUNT = 5
+
+#FILE NAMES
+USER_FILE = 'users.csv'
 
 def get_goodreads_api_key():
     try:
         f = open("key.txt", "r")
         key = f.readline()
         f.close()    
-    except OSError as e:
-        print('[ERROR]:Please provide your GoodReads API key in key.txt')
-    
-    return key
+        return key
 
+    except OSError:
+        print('[ERROR]:Please provide your GoodReads API key in key.txt')
     
 def write_to_csv(df, file):
     df.to_csv(file)   
+    print("### Done writing to file : ", file)
 
 def get_soup(url):
     r = requests.get(url, timeout = 5)      
@@ -45,6 +49,7 @@ def get_user_data(userIDs, key):
     df = pd.DataFrame(columns = ['user_id','user_reviews_count'])
     exception_list = []
 
+    user_ctr = 0
     for userID in userIDs:
         try:
             data_url = 'https://www.goodreads.com/user/show/' + str(userID) +'.xml?key=' + key
@@ -55,15 +60,17 @@ def get_user_data(userIDs, key):
                 
             if soup.html.user.id is not None:
                 if(len(soup.html.user.id.contents)>0):
-                    df.loc[j,'user_id'] = soup.html.user.id.contents[0]
+                    df.loc[user_ctr,'user_id'] = soup.html.user.id.contents[0]
                     
             if soup.html.user.user_shelves is not None:
                 if(len(soup.html.user.user_shelves.contents)>0):
                     for element in soup.html.user.user_shelves.find_all("user_shelf"):
                         if(element.find_all("name")[0].contents[0] == 'read' ):
                             total_reviews = int(element.book_count.contents[0])
-                            df.loc[j,'user_reviews_count'] = total_reviews
+                            df.loc[user_ctr,'user_reviews_count'] = total_reviews
                             break
+            user_ctr += 1
+        
         except:
             exception_list.append(userID)
             continue
@@ -98,9 +105,11 @@ def write_user_file():
     # Randomly select a list of 100000 users
     random_users = random.sample(range(0, TOTAL_USERS), SAMPLE_USERS)
     user_df = get_user_data(random_users, key)
+
+    #TODO: merge the add username logic to get_user_data <Kunaal>
     user_df = add_username(user_df, key)
 
-    write_to_csv(user_df, 'users.csv')
+    write_to_csv(user_df, USER_FILE)
 
 if __name__ == "__main__":
     operation = str(sys.argv[1])
