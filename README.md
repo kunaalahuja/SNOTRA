@@ -4,8 +4,11 @@ codebase for SNOTRA: Scalable Neighbour based Online Textbook Recommendation App
 to run the code, clone the repository and go the folder codebase: 
 
 ## Data Fetch
+We use Goodreads API to fetch data for the book recommendation engine.
+We expect you to have Goodreads API from here : https://www.goodreads.com/api/keys 
+and it should be stored in 'key.txt'
 
-python data_fetch \<operation\>
+[Usage]: python data_fetch \<operation\>
 
 We support the following operations:
   
@@ -20,6 +23,6 @@ We support the following operations:
   v)   csv - write all the csvs needed for the recommendation engine
   
 ## Application
-i) python application.py
+[Usage]: python application.py
 
-ii) Open http://127.0.0.1:5000/ to view the SNOTRA webapp.
+Open http://127.0.0.1:5000/ to view the SNOTRA webapp.
