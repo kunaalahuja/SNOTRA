@@ -15,12 +15,16 @@ SAMPLE_USERS = 100
 USERS_COUNT = 5
 
 def get_goodreads_api_key():
-    f = open("key.txt", "r")
-    key = f.readline()
-    f.close()
+    try:
+        f = open("key.txt", "r")
+        key = f.readline()
+        f.close()    
+    except OSError as e:
+        print('[ERROR]:Please provide your GoodReads API key in key.txt')
     
     return key
 
+    
 def write_to_csv(df, file):
     df.to_csv(file)   
 
